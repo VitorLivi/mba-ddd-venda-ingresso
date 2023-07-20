@@ -1,4 +1,4 @@
-import { AgregateRoot } from '../../../@shared/domain/agregate-root';
+import { AggregateRoot } from '../../../@shared/domain/aggregate-root';
 import { Uuid } from '../../../@shared/domain/value-objects/uuid.vo';
 import { EventSection } from './event-section.entity';
 import { PartnerId } from './partner.entity';
@@ -31,7 +31,7 @@ export interface EventConstructorProps {
   sections?: Set<EventSection>;
 }
 
-export class Event extends AgregateRoot {
+export class Event extends AggregateRoot {
   id: EventId;
   name: string;
   description: string | null;

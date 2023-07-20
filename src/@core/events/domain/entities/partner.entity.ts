@@ -1,4 +1,4 @@
-import { AgregateRoot } from '../../../@shared/domain/agregate-root';
+import { AggregateRoot } from '../../../@shared/domain/aggregate-root';
 import { Uuid } from '../../../@shared/domain/value-objects/uuid.vo';
 import { Event } from './event.entity';
 
@@ -15,7 +15,7 @@ export type PartnerConstructorProps = {
   name: string;
 };
 
-export class Partner extends AgregateRoot {
+export class Partner extends AggregateRoot {
   readonly id: PartnerId;
   name: string;
 
@@ -23,14 +23,13 @@ export class Partner extends AgregateRoot {
     super();
 
     this.id = props.id ? (props.id instanceof PartnerId ? props.id : new PartnerId(props.id)) : new PartnerId();
+    this.name = props.name;
   }
 
   static create(command: { name: string }): Partner {
-    const partner = new Partner({
+    return new Partner({
       name: command.name,
     });
-
-    return partner;
   }
 
   initEvent(command: InitEventCommand): Event {

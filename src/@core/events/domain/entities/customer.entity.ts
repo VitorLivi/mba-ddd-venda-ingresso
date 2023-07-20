@@ -1,5 +1,5 @@
 import { Uuid } from '../../../@shared/domain/value-objects/uuid.vo';
-import { AgregateRoot } from '../../../@shared/domain/agregate-root';
+import { AggregateRoot } from '../../../@shared/domain/aggregate-root';
 import { Cpf } from '../../../@shared/domain/value-objects/cpf.vo';
 
 export class CustomerId extends Uuid {}
@@ -10,7 +10,7 @@ export type CustomerConstructorProps = {
   name: string;
 };
 
-export class Customer extends AgregateRoot {
+export class Customer extends AggregateRoot {
   id: CustomerId;
   cpf: Cpf;
   name: string;
