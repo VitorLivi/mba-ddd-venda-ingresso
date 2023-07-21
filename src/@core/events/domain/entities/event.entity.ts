@@ -1,5 +1,6 @@
 import { AggregateRoot } from '../../../@shared/domain/aggregate-root';
 import { Uuid } from '../../../@shared/domain/value-objects/uuid.vo';
+import { AnyCollection, ICollection, MyCollectionFactory } from '../my-collection';
 import { EventSection } from './event-section.entity';
 import { PartnerId } from './partner.entity';
 
@@ -28,7 +29,6 @@ export interface EventConstructorProps {
   total_spots: number;
   total_spots_reserved: number;
   partner_id: PartnerId | string;
-  sections?: Set<EventSection>;
 }
 
 export class Event extends AggregateRoot {
@@ -40,7 +40,7 @@ export class Event extends AggregateRoot {
   total_spots: number;
   total_spots_reserved: number;
   partner_id: PartnerId;
-  sections: Set<EventSection>;
+  private _sections: ICollection<EventSection>;
 
   constructor(props: EventConstructorProps) {
     super();
@@ -54,7 +54,7 @@ export class Event extends AggregateRoot {
     this.total_spots = props.total_spots;
     this.total_spots_reserved = props.total_spots_reserved;
     this.partner_id = props.partner_id instanceof PartnerId ? props.partner_id : new PartnerId(props.partner_id);
-    this.sections = props.sections ?? new Set<EventSection>();
+    this._sections = MyCollectionFactory.create<EventSection>(this);
   }
 
   static create(command: CreateEventCommand): Event {
@@ -83,12 +83,12 @@ export class Event extends AggregateRoot {
 
   publishAll(): void {
     this.publish();
-    this.sections.forEach((section) => section.publishAll());
+    this._sections.forEach((section) => section.publishAll());
   }
 
   unPublishAll(): void {
     this.unPublish();
-    this.sections.forEach((section) => section.unPublishAll());
+    this._sections.forEach((section) => section.unPublishAll());
   }
 
   publish(): void {
@@ -101,8 +101,16 @@ export class Event extends AggregateRoot {
 
   addSection(command: AddSectionCommand) {
     const section = EventSection.create(command);
-    this.sections.add(section);
+    this._sections.add(section);
     this.total_spots += section.total_spots;
+  }
+
+  get sections(): ICollection<EventSection> {
+    return this._sections as ICollection<EventSection>;
+  }
+
+  set sections(sections: AnyCollection<EventSection>) {
+    this._sections = MyCollectionFactory.createFrom<EventSection>(sections);
   }
 
   toJSON() {
@@ -115,7 +123,7 @@ export class Event extends AggregateRoot {
       total_spots: this.total_spots,
       total_spots_reserved: this.total_spots_reserved,
       partner_id: this.partner_id.value,
-      sections: [...this.sections].map((section) => section.toJSON()),
+      sections: [...this._sections].map((section) => section.toJSON()),
     };
   }
 }
