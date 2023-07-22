@@ -2,7 +2,7 @@ import { Uuid } from '../../../@shared/domain/value-objects/uuid.vo';
 import { AggregateRoot } from '../../../@shared/domain/aggregate-root';
 import { Cpf } from '../../../@shared/domain/value-objects/cpf.vo';
 
-export class CustomerId extends Uuid {}
+export class CustomerId extends Uuid { }
 
 export type CustomerConstructorProps = {
   id?: CustomerId | string;
@@ -20,8 +20,8 @@ export class Customer extends AggregateRoot {
 
     this.id =
       typeof props.id === 'string' ?
-      new CustomerId(props.id) :
-      props.id ?? new CustomerId();
+        new CustomerId(props.id) :
+        props.id ?? new CustomerId();
     this.cpf = props.cpf;
     this.name = props.name;
   }
@@ -39,8 +39,8 @@ export class Customer extends AggregateRoot {
 
   toJSON() {
     return {
-      id: this.id,
-      cpf: this.cpf,
+      id: this.id.value,
+      cpf: this.cpf.value,
       name: this.name,
     };
   }

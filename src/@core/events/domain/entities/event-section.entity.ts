@@ -147,6 +147,7 @@ export class EventSection extends Entity {
     spot.markAsReserved();
   }
 
+  // @ts-expect-error
   get spots(): ICollection<EventSpot> {
     return this._spots as ICollection<EventSpot>;
   }

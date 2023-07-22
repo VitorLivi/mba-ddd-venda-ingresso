@@ -9,9 +9,9 @@ export class EventService {
     private eventRepo: IEventRepository,
     private partnerRepo: IPartnerRepository,
     private uow: IUnitOfWork,
-  ) {}
+  ) { }
 
-  list() {
+  findEvents() {
     return this.eventRepo.findAll();
   }
 

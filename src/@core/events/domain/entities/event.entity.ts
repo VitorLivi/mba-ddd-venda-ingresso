@@ -182,6 +182,7 @@ export class Event extends AggregateRoot {
     section.markSpotAsReserved(command.spot_id);
   }
 
+  // @ts-expect-error
   get sections(): ICollection<EventSection> {
     return this._sections as ICollection<EventSection>;
   }
