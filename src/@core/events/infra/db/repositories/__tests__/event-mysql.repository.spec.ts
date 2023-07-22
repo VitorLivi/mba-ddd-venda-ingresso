@@ -42,7 +42,7 @@ test('event repository', async () => {
     total_spots: 1000,
   });
 
-  eventRepo.add(event);
+  await eventRepo.add(event);
   await em.flush();
   em.clear();
 

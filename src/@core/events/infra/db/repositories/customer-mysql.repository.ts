@@ -10,7 +10,7 @@ export class CustomerMysqlRepository implements ICustomerRepository {
   }
 
   async findById(id: string | CustomerId): Promise<Customer> {
-    return this.entityManager.findOneOrFail(Customer, {
+    return await this.entityManager.findOneOrFail(Customer, {
       id: typeof id === 'string' ? new CustomerId(id) : id,
     });
   }

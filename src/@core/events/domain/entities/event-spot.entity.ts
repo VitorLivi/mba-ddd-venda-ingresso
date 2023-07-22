@@ -1,7 +1,7 @@
 import { Entity } from '../../../@shared/domain/entity';
 import { Uuid } from '../../../@shared/domain/value-objects/uuid.vo';
 
-export class EventSpotId extends Uuid {}
+export class EventSpotId extends Uuid { }
 
 export interface EventSpotConstructorProps {
   id?: EventSpotId | string;
@@ -35,6 +35,10 @@ export class EventSpot extends Entity {
 
   changeLocation(location: string): void {
     this.location = location;
+  }
+
+  markAsReserved(): void {
+    this.is_reserved = true;
   }
 
   publish(): void {

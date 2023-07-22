@@ -5,9 +5,9 @@ import {
   ICollection,
   MyCollectionFactory,
 } from '../my-collection';
-import { EventSpot } from './event-spot.entity';
+import { EventSpot, EventSpotId } from './event-spot.entity';
 
-export class EventSectionId extends Uuid {}
+export class EventSectionId extends Uuid { }
 
 export interface CreateEventSectionCommand {
   name: string;
@@ -39,7 +39,11 @@ export class EventSection extends Entity {
   constructor(props: EventSectionConstructorProps) {
     super();
 
-    this.id = props.id ? (props.id instanceof EventSectionId ? props.id : new EventSectionId(props.id)) : new EventSectionId();
+    this.id = props.id
+      ? props.id instanceof EventSectionId
+        ? props.id
+        : new EventSectionId(props.id)
+      : new EventSectionId();
     this.name = props.name;
     this.description = props.description;
     this.is_published = props.is_published;
@@ -62,7 +66,7 @@ export class EventSection extends Entity {
   }
 
   private initSpots() {
-    for(let i = 0; i < this.total_spots; i++) {
+    for (let i = 0; i < this.total_spots; i++) {
       this._spots.add(EventSpot.create());
     }
   }
@@ -77,6 +81,16 @@ export class EventSection extends Entity {
 
   changePrice(price: number) {
     this.price = price;
+  }
+
+  changeLocation(command: { spot_id: EventSpotId; location: string }) {
+    const spot = this.spots.find((spot) => spot.id.equals(command.spot_id));
+
+    if (!spot) {
+      throw new Error('Spot not found');
+    }
+
+    spot.changeLocation(command.location);
   }
 
   publishAll(): void {
@@ -95,6 +109,42 @@ export class EventSection extends Entity {
 
   unPublish(): void {
     this.is_published = false;
+  }
+
+  allowReserveSpot(spot_id: EventSpotId) {
+    if (!this.is_published) {
+      return false;
+    }
+
+    const spot = this.spots.find((spot) => spot.id.equals(spot_id));
+
+    if (!spot) {
+      throw new Error('Spot not found');
+    }
+
+    if (spot.is_reserved) {
+      return false;
+    }
+
+    if (!spot.is_published) {
+      return false;
+    }
+
+    return true;
+  }
+
+  markSpotAsReserved(spot_id: EventSpotId) {
+    const spot = this.spots.find((spot) => spot.id.equals(spot_id));
+
+    if (!spot) {
+      throw new Error('Spot not found');
+    }
+
+    if (spot.is_reserved) {
+      throw new Error('Spot already reserved');
+    }
+
+    spot.markAsReserved();
   }
 
   get spots(): ICollection<EventSpot> {

@@ -1,10 +1,15 @@
 import { AggregateRoot } from '../../../@shared/domain/aggregate-root';
 import { Uuid } from '../../../@shared/domain/value-objects/uuid.vo';
-import { AnyCollection, ICollection, MyCollectionFactory } from '../my-collection';
-import { EventSection } from './event-section.entity';
+import {
+  AnyCollection,
+  ICollection,
+  MyCollectionFactory,
+} from '../my-collection';
+import { EventSection, EventSectionId } from './event-section.entity';
+import { EventSpotId } from './event-spot.entity';
 import { PartnerId } from './partner.entity';
 
-export class EventId extends Uuid {}
+export class EventId extends Uuid { }
 
 export interface CreateEventCommand {
   name: string;
@@ -45,7 +50,11 @@ export class Event extends AggregateRoot {
   constructor(props: EventConstructorProps) {
     super();
 
-    this.id = props.id ? (props.id instanceof EventId ? props.id : new EventId(props.id)) : new EventId();
+    this.id = props.id
+      ? props.id instanceof EventId
+        ? props.id
+        : new EventId(props.id)
+      : new EventId();
 
     this.name = props.name;
     this.description = props.description;
@@ -53,7 +62,10 @@ export class Event extends AggregateRoot {
     this.is_published = props.is_published;
     this.total_spots = props.total_spots;
     this.total_spots_reserved = props.total_spots_reserved;
-    this.partner_id = props.partner_id instanceof PartnerId ? props.partner_id : new PartnerId(props.partner_id);
+    this.partner_id =
+      props.partner_id instanceof PartnerId
+        ? props.partner_id
+        : new PartnerId(props.partner_id);
     this._sections = MyCollectionFactory.create<EventSection>(this);
   }
 
@@ -99,10 +111,75 @@ export class Event extends AggregateRoot {
     this.is_published = false;
   }
 
-  addSection(command: AddSectionCommand) {
+  addSection(command: AddSectionCommand): EventSection {
     const section = EventSection.create(command);
     this._sections.add(section);
     this.total_spots += section.total_spots;
+    return section;
+  }
+
+  changeSectionInformation(command: {
+    section_id: EventSectionId;
+    name?: string;
+    description?: string | null;
+  }): void {
+    const section = this.sections.find((section) =>
+      section.id.equals(command.section_id),
+    );
+
+    if (!section) {
+      throw new Error('Section not found');
+    }
+
+    'name' in command && section.changeName(command.name);
+    'description' in command && section.changeDescription(command.description);
+  }
+
+  changeLocation(command: {
+    section_id: EventSectionId;
+    spot_id: EventSpotId;
+    location: string;
+  }): void {
+    const section = this.sections.find((section) =>
+      section.id.equals(command.section_id),
+    );
+
+    if (!section) {
+      throw new Error('Section not found');
+    }
+
+    section.changeLocation(command);
+  }
+
+  allowReserveSpot(data: { section_id: EventSectionId; spot_id: EventSpotId }) {
+    if (!this.is_published) {
+      return false;
+    }
+
+    const section = this.sections.find((section) =>
+      section.id.equals(data.section_id),
+    );
+
+    if (!section) {
+      throw new Error('Section not found');
+    }
+
+    return section.allowReserveSpot(data.spot_id);
+  }
+
+  markSpotAsReserved(command: {
+    section_id: EventSectionId;
+    spot_id: EventSpotId;
+  }): void {
+    const section = this.sections.find((section) =>
+      section.id.equals(command.section_id),
+    );
+
+    if (!section) {
+      throw new Error('Section not found');
+    }
+
+    section.markSpotAsReserved(command.spot_id);
   }
 
   get sections(): ICollection<EventSection> {
