@@ -9,7 +9,7 @@ import { EventSection, EventSectionId } from './event-section.entity';
 import { EventSpotId } from './event-spot.entity';
 import { PartnerId } from './partner.entity';
 
-export class EventId extends Uuid { }
+export class EventId extends Uuid {}
 
 export interface CreateEventCommand {
   name: string;
